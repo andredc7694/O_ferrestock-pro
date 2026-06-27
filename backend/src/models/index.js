@@ -6,6 +6,7 @@ import UnidadMedida from './UnidadMedida.js'
 import Proveedor from './Proveedor.js'
 import Producto from './Producto.js'
 import Inventario from './Inventario.js'
+import MovimientoInventario from './MovimientoInventario.js'
 
 // ── ASOCIACIONES ──
 
@@ -29,9 +30,17 @@ Proveedor.hasMany(Producto, { foreignKey: 'proveedor_id', as: 'productos' })
 Producto.hasOne(Inventario, { foreignKey: 'producto_id', as: 'inventario' })
 Inventario.belongsTo(Producto, { foreignKey: 'producto_id', as: 'producto' })
 
+// MovimientoInventario - Producto
+MovimientoInventario.belongsTo(Producto, { foreignKey: 'producto_id', as: 'producto' })
+Producto.hasMany(MovimientoInventario, { foreignKey: 'producto_id', as: 'movimientos' })
+
+// MovimientoInventario - Usuario
+MovimientoInventario.belongsTo(Usuario, { foreignKey: 'usuario_id', as: 'usuario' })
+Usuario.hasMany(MovimientoInventario, { foreignKey: 'usuario_id', as: 'movimientos' })
+
 export {
   sequelize,
   Rol, Usuario,
   Categoria, UnidadMedida, Proveedor,
-  Producto, Inventario
+  Producto, Inventario, MovimientoInventario
 }
