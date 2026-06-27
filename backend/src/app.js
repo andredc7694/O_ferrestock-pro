@@ -1,24 +1,20 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import router from './routes/index.js'
 
-// Cargar variables de entorno
 dotenv.config()
 
 const app = express()
 
 // ── MIDDLEWARES GLOBALES ──
-// Permite recibir JSON en las peticiones
 app.use(express.json())
-
-// Permite peticiones desde el frontend (CORS)
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   credentials: true
 }))
 
-// ── RUTA DE PRUEBA ──
-// Esta ruta sirve para verificar que el servidor está vivo
+// ── RUTA DE SALUD ──
 app.get('/api/health', (req, res) => {
   res.json({
     success: true,
@@ -27,7 +23,10 @@ app.get('/api/health', (req, res) => {
   })
 })
 
-// ── MANEJO DE RUTAS NO ENCONTRADAS ──
+// ── TODAS LAS RUTAS DEL SISTEMA ──
+app.use('/api', router)
+
+// ── RUTAS NO ENCONTRADAS ──
 app.use((req, res) => {
   res.status(404).json({
     success: false,
