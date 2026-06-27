@@ -7,6 +7,9 @@ import Proveedor from './Proveedor.js'
 import Producto from './Producto.js'
 import Inventario from './Inventario.js'
 import MovimientoInventario from './MovimientoInventario.js'
+import Cliente from './Cliente.js'
+import Venta from './Venta.js'
+import DetalleVenta from './DetalleVenta.js'
 
 // ── ASOCIACIONES ──
 
@@ -30,17 +33,32 @@ Proveedor.hasMany(Producto, { foreignKey: 'proveedor_id', as: 'productos' })
 Producto.hasOne(Inventario, { foreignKey: 'producto_id', as: 'inventario' })
 Inventario.belongsTo(Producto, { foreignKey: 'producto_id', as: 'producto' })
 
-// MovimientoInventario - Producto
+// MovimientoInventario
 MovimientoInventario.belongsTo(Producto, { foreignKey: 'producto_id', as: 'producto' })
 Producto.hasMany(MovimientoInventario, { foreignKey: 'producto_id', as: 'movimientos' })
-
-// MovimientoInventario - Usuario
 MovimientoInventario.belongsTo(Usuario, { foreignKey: 'usuario_id', as: 'usuario' })
 Usuario.hasMany(MovimientoInventario, { foreignKey: 'usuario_id', as: 'movimientos' })
+
+// Venta - Cliente
+Venta.belongsTo(Cliente, { foreignKey: 'cliente_id', as: 'cliente' })
+Cliente.hasMany(Venta, { foreignKey: 'cliente_id', as: 'ventas' })
+
+// Venta - Usuario (vendedor)
+Venta.belongsTo(Usuario, { foreignKey: 'vendedor_id', as: 'vendedor' })
+Usuario.hasMany(Venta, { foreignKey: 'vendedor_id', as: 'ventas' })
+
+// Venta - DetalleVenta
+Venta.hasMany(DetalleVenta, { foreignKey: 'venta_id', as: 'items' })
+DetalleVenta.belongsTo(Venta, { foreignKey: 'venta_id', as: 'venta' })
+
+// DetalleVenta - Producto
+DetalleVenta.belongsTo(Producto, { foreignKey: 'producto_id', as: 'producto' })
+Producto.hasMany(DetalleVenta, { foreignKey: 'producto_id', as: 'detalles' })
 
 export {
   sequelize,
   Rol, Usuario,
   Categoria, UnidadMedida, Proveedor,
-  Producto, Inventario, MovimientoInventario
+  Producto, Inventario, MovimientoInventario,
+  Cliente, Venta, DetalleVenta
 }
