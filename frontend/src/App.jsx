@@ -1,15 +1,26 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext.jsx'
 import PrivateRoute from './routes/PrivateRoute.jsx'
-import LoginPage from './pages/auth/LoginPage.jsx'
-import ProductosPage from './pages/productos/ProductosPage.jsx'
-import ProductoFormPage from './pages/productos/ProductoFormPage.jsx'
-import InventarioPage from './pages/inventario/InventarioPage.jsx'
-import MovimientoFormPage from './pages/inventario/MovimientoFormPage.jsx'
 
-// Dashboard mejorado con accesos directos
-const DashboardTemp = () => {
+// Páginas
+import LoginPage            from './pages/auth/LoginPage.jsx'
+import ProductosPage        from './pages/productos/ProductosPage.jsx'
+import ProductoFormPage     from './pages/productos/ProductoFormPage.jsx'
+import InventarioPage       from './pages/inventario/InventarioPage.jsx'
+import MovimientoFormPage   from './pages/inventario/MovimientoFormPage.jsx'
+import ProveedoresPage      from './pages/proveedores/ProveedoresPage.jsx'
+import ProveedorFormPage    from './pages/proveedores/ProveedorFormPage.jsx'
+import ProveedorDetallePage from './pages/proveedores/ProveedorDetallePage.jsx'
+
+// Dashboard con todos los módulos disponibles
+const Dashboard = () => {
   const { usuario, logout } = useAuth()
+
+  const modulos = [
+    { href: '/productos',   emoji: '📦', label: 'Productos',   roles: ['Administrador','Vendedor','Bodeguero'] },
+    { href: '/inventario',  emoji: '🏭', label: 'Inventario',  roles: ['Administrador','Bodeguero'] },
+    { href: '/proveedores', emoji: '🏢', label: 'Proveedores', roles: ['Administrador'] }
+  ].filter(m => m.roles.includes(usuario?.rol))
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -31,27 +42,23 @@ const DashboardTemp = () => {
         </div>
       </nav>
 
-      {/* Contenido */}
+      {/* Módulos */}
       <div className="p-6">
         <h2 className="text-xl font-semibold text-gray-700 mb-6">
           Bienvenido, {usuario?.nombre} 👋
         </h2>
-
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-2xl">
-          {[
-            { href: '/productos', emoji: '📦', label: 'Productos' },
-            { href: '/inventario', emoji: '🏭', label: 'Inventario' }
-          ].map(item => (
-            <a            
+          {modulos.map(m => (
+            <a
             
-              key={item.href}
-              href={item.href}
+              key={m.href}
+              href={m.href}
               className="bg-white rounded-xl shadow p-6 hover:shadow-md
                          transition text-center border-2 border-transparent
                          hover:border-blue-500"
             >
-              <div className="text-3xl mb-2">{item.emoji}</div>
-              <p className="font-semibold text-gray-700">{item.label}</p>
+              <div className="text-3xl mb-2">{m.emoji}</div>
+              <p className="font-semibold text-gray-700">{m.label}</p>
             </a>
           ))}
         </div>
@@ -65,15 +72,15 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Públicas */}
+          {/* Pública */}
           <Route path="/login" element={<LoginPage />} />
 
           {/* Dashboard */}
           <Route path="/dashboard" element={
-            <PrivateRoute><DashboardTemp /></PrivateRoute>
+            <PrivateRoute><Dashboard /></PrivateRoute>
           } />
 
-          {/* Módulo Productos */}
+          {/* Productos */}
           <Route path="/productos" element={
             <PrivateRoute><ProductosPage /></PrivateRoute>
           } />
@@ -84,12 +91,26 @@ function App() {
             <PrivateRoute><ProductoFormPage /></PrivateRoute>
           } />
 
-          {/* Módulo Inventario */}
+          {/* Inventario */}
           <Route path="/inventario" element={
             <PrivateRoute><InventarioPage /></PrivateRoute>
           } />
           <Route path="/inventario/movimiento/nuevo" element={
             <PrivateRoute><MovimientoFormPage /></PrivateRoute>
+          } />
+
+          {/* Proveedores */}
+          <Route path="/proveedores" element={
+            <PrivateRoute><ProveedoresPage /></PrivateRoute>
+          } />
+          <Route path="/proveedores/nuevo" element={
+            <PrivateRoute><ProveedorFormPage /></PrivateRoute>
+          } />
+          <Route path="/proveedores/:id" element={
+            <PrivateRoute><ProveedorDetallePage /></PrivateRoute>
+          } />
+          <Route path="/proveedores/:id/editar" element={
+            <PrivateRoute><ProveedorFormPage /></PrivateRoute>
           } />
 
           {/* Raíz */}
