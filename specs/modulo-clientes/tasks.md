@@ -1,166 +1,99 @@
-# tasks.md — Módulo de Productos
-# FerreStock Pro — Sprint 1
+# tasks.md — Módulo de Clientes
+# FerreStock Pro — Sprint 5
 # Flujo SDD: /speckit.tasks
 
 ---
 
-## TAREA 1 — Modelos Sequelize: Categoria, UnidadMedida, Proveedor, Producto, Inventario
+## TAREA 1 — Servicio de Clientes
 
 **Criterios de aceptación:**
-- [ ] Categoria.js mapea tabla categorias con soft delete
-- [ ] UnidadMedida.js mapea tabla unidades_medida sin soft delete
-- [ ] Proveedor.js mapea tabla proveedores con soft delete
-- [ ] Producto.js mapea tabla productos con todas las FK y soft delete
-- [ ] Inventario.js mapea tabla inventario sin soft delete (1:1 con producto)
-- [ ] Todas las asociaciones definidas en models/index.js
-- [ ] Los modelos se importan correctamente desde index.js
+- [ ] listar(filtros): búsqueda por nombre, numero_documento o teléfono
+- [ ] obtenerPorId(id): devuelve cliente con total_acumulado y total_compras
+- [ ] obtenerVentas(id, paginacion): historial de compras del cliente
+- [ ] crear(datos): valida tipo y número de documento, unicidad
+- [ ] editar(id, datos): revalida documento si cambia
+- [ ] desactivar(id): soft delete
 
 ---
 
-## TAREA 2 — Servicio y Controlador de Categorías
+## TAREA 2 — Controlador y Rutas
 
 **Criterios de aceptación:**
-- [ ] listar(): devuelve todas las categorías activas
-- [ ] crear(datos): valida nombre único, crea categoría
-- [ ] editar(id, datos): actualiza nombre y descripción
-- [ ] desactivar(id): verifica que no tenga productos activos antes de soft delete
-- [ ] Controlador maneja errores con try/catch en todos los métodos
-
----
-
-## TAREA 3 — Rutas de Categorías
-
-**Criterios de aceptación:**
-- [ ] GET /api/categorias → verificarToken (todos los roles)
-- [ ] POST /api/categorias → verificarToken + verificarRol('Administrador')
-- [ ] PUT /api/categorias/:id → verificarToken + verificarRol('Administrador')
-- [ ] DELETE /api/categorias/:id → verificarToken + verificarRol('Administrador')
+- [ ] GET /api/clientes → Admin y Vendedor
+- [ ] GET /api/clientes/:id → Admin y Vendedor
+- [ ] GET /api/clientes/:id/ventas → Admin y Vendedor
+- [ ] POST /api/clientes → Admin y Vendedor
+- [ ] PUT /api/clientes/:id → Admin y Vendedor
+- [ ] DELETE /api/clientes/:id → solo Admin
 - [ ] Rutas registradas en routes/index.js
 
 ---
 
-## TAREA 4 — Utilidad: generador de código de producto
-
-**Archivo:** backend/src/utils/generadores.js
+## TAREA 3 — Servicio frontend + Hook
 
 **Criterios de aceptación:**
-- [ ] generarCodigoProducto(categoriaId) busca la categoría en BD
-- [ ] Toma las primeras 4 letras del nombre en mayúsculas
-- [ ] Busca el último código de ese prefijo en la tabla productos
-- [ ] Retorna el siguiente código en formato XXXX-NNNN
-- [ ] Si no existe ningún código con ese prefijo, retorna XXXX-0001
+- [ ] clientes.service.js: listar, obtener, obtenerVentas, crear, editar, desactivar
+- [ ] useClientes.js: { clientes, pagination, loading, error, recargar }
 
 ---
 
-## TAREA 5 — Servicio de Productos
+## TAREA 4 — ClientesPage (tabla)
 
 **Criterios de aceptación:**
-- [ ] listar(filtros, paginacion): busca con JOIN a categoria, unidad, inventario y proveedor
-- [ ] listar(): aplica filtro search (nombre O código, case-insensitive)
-- [ ] listar(): aplica filtro categoria_id
-- [ ] listar(): calcula estado_stock (NORMAL/CRITICO/SIN_STOCK) por cada producto
-- [ ] obtenerPorId(id): devuelve producto con todos sus datos
-- [ ] crear(datos): valida precio_venta >= precio_compra
-- [ ] crear(datos): autogenera código si no se proporciona
-- [ ] crear(datos): crea producto E inventario en una transacción
-- [ ] editar(id, datos): actualiza producto, no permite cambiar código
-- [ ] desactivar(id): soft delete del producto
+- [ ] Tabla: Nombre, Documento, Teléfono, Email, Acciones
+- [ ] Búsqueda con debounce 300ms
+- [ ] Botones: Ver detalle, Editar, Desactivar (solo Admin)
+- [ ] Botón "Nuevo Cliente"
 
 ---
 
-## TAREA 6 — Controlador de Productos
+## TAREA 5 — ClienteFormPage (formulario)
 
 **Criterios de aceptación:**
-- [ ] listar: extrae query params (search, categoria_id, page, limit)
-- [ ] obtener: devuelve 404 si no existe
-- [ ] crear: valida campos obligatorios antes de llamar al servicio
-- [ ] editar: devuelve 404 si no existe el producto
-- [ ] desactivar: devuelve 404 si no existe, solo Admin puede ejecutarlo
-- [ ] Todos los métodos tienen try/catch
+- [ ] Funciona para crear y editar
+- [ ] Select tipo documento (DNI/RUC) cambia la validación
+- [ ] Validación en tiempo real con indicador visual
+- [ ] Mensaje de éxito y redirección al guardar
 
 ---
 
-## TAREA 7 — Rutas de Productos
+## TAREA 6 — ClienteDetallePage (detalle + historial)
 
 **Criterios de aceptación:**
-- [ ] GET /api/productos → verificarToken (todos)
-- [ ] GET /api/productos/:id → verificarToken (todos)
-- [ ] POST /api/productos → verificarToken + verificarRol('Administrador','Bodeguero')
-- [ ] PUT /api/productos/:id → verificarToken + verificarRol('Administrador','Bodeguero')
-- [ ] DELETE /api/productos/:id → verificarToken + verificarRol('Administrador')
-- [ ] Rutas registradas en routes/index.js
+- [ ] Datos del cliente con total acumulado destacado
+- [ ] Historial de compras paginado
+- [ ] Clic en venta → abre comprobante
+- [ ] Botón editar cliente
 
 ---
 
-## TAREA 8 — Servicios frontend: categorias y productos
+## TAREA 7 — Integrar búsqueda de cliente en PosPage
 
 **Criterios de aceptación:**
-- [ ] categorias.service.js: listar(), crear(), editar(), desactivar()
-- [ ] productos.service.js: listar(params), obtener(id), crear(), editar(), desactivar()
-- [ ] Todos usan la instancia api.js de Axios
+- [ ] Campo de búsqueda de cliente en el POS
+- [ ] Busca por DNI o nombre con debounce
+- [ ] Dropdown con resultados
+- [ ] Al seleccionar muestra nombre del cliente
+- [ ] Botón para quitar cliente seleccionado (venta anónima)
 
 ---
 
-## TAREA 9 — Custom Hooks
+## TAREA 8 — Actualizar App.jsx y Dashboard
 
 **Criterios de aceptación:**
-- [ ] useCategorias.js: devuelve { categorias, loading, error, recargar }
-- [ ] useProductos.js: devuelve { productos, pagination, loading, error, recargar }
-- [ ] useProductos acepta filtros como parámetro: useProductos({ search, categoria_id })
-- [ ] Ambos hooks manejan los 3 estados: loading, error, data
-- [ ] useProductos implementa debounce de 300ms para el search
+- [ ] /clientes → ClientesPage
+- [ ] /clientes/nuevo → ClienteFormPage
+- [ ] /clientes/:id → ClienteDetallePage
+- [ ] /clientes/:id/editar → ClienteFormPage
+- [ ] Acceso desde Dashboard para Admin y Vendedor
 
 ---
 
-## TAREA 10 — Página ProductosPage (tabla principal)
+## TAREA 9 — Pruebas en Postman
 
 **Criterios de aceptación:**
-- [ ] Muestra tabla con columnas: Código, Nombre, Categoría, Unidad, Precio Venta, Stock, Estado, Acciones
-- [ ] Buscador por nombre/código con debounce 300ms
-- [ ] Dropdown para filtrar por categoría
-- [ ] Paginación funcional (botones anterior/siguiente + número de página)
-- [ ] Badge de estado de stock: verde (NORMAL), amarillo (CRITICO), rojo (SIN_STOCK)
-- [ ] Botones de Editar y Desactivar por fila (según rol)
-- [ ] Botón "Nuevo Producto" que navega al formulario
-- [ ] Muestra Spinner mientras carga
-- [ ] Muestra mensaje si no hay productos
-
----
-
-## TAREA 11 — Página ProductoFormPage (formulario)
-
-**Criterios de aceptación:**
-- [ ] Funciona para CREAR (ruta: /productos/nuevo) y EDITAR (ruta: /productos/:id/editar)
-- [ ] Campos: código (deshabilitado en edición), nombre, descripción, categoría (select),
-      unidad de medida (select), precio compra, precio venta, stock mínimo, proveedor (select)
-- [ ] Validación en tiempo real: precio_venta >= precio_compra
-- [ ] Validación: stock_minimo >= 0
-- [ ] Todos los campos obligatorios validados antes de enviar
-- [ ] Muestra mensaje de éxito y redirige a la lista al guardar
-- [ ] Muestra mensaje de error si falla el backend
-- [ ] Botón cancelar regresa a la lista
-
----
-
-## TAREA 12 — Actualizar rutas en App.jsx y Sidebar
-
-**Criterios de aceptación:**
-- [ ] Ruta /productos → ProductosPage (protegida, todos los roles)
-- [ ] Ruta /productos/nuevo → ProductoFormPage (Admin y Bodeguero)
-- [ ] Ruta /productos/:id/editar → ProductoFormPage (Admin y Bodeguero)
-- [ ] Link a Productos visible en el Sidebar para todos los roles
-
----
-
-## TAREA 13 — Pruebas en Postman
-
-**Criterios de aceptación:**
-- [ ] GET /api/productos → lista paginada con stock incluido
-- [ ] GET /api/productos?search=martillo → filtra correctamente
-- [ ] GET /api/productos?categoria_id=1 → filtra por categoría
-- [ ] POST /api/productos → crea producto y su inventario
-- [ ] POST /api/productos con precio_venta < precio_compra → error 400
-- [ ] PUT /api/productos/:id → actualiza datos
-- [ ] DELETE /api/productos/:id → soft delete
-- [ ] GET /api/categorias → lista categorías
-- [ ] POST /api/categorias → crea categoría (con token Admin)
+- [ ] POST con DNI de 7 dígitos → error 400
+- [ ] POST con DNI duplicado → error 400
+- [ ] POST válido → cliente creado
+- [ ] GET /api/clientes/1 → datos con total acumulado
+- [ ] GET /api/clientes/1/ventas → historial paginado

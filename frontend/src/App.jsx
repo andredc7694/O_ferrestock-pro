@@ -15,6 +15,11 @@ import PosPage              from './pages/ventas/PosPage.jsx'
 import ComprobantePage      from './pages/ventas/ComprobantePage.jsx'
 import VentasPage           from './pages/ventas/VentasPage.jsx'
 
+// Agregar estos imports
+import ClientesPage      from './pages/clientes/ClientesPage.jsx'
+import ClienteFormPage   from './pages/clientes/ClienteFormPage.jsx'
+import ClienteDetallePage from './pages/clientes/ClienteDetallePage.jsx'
+
 const Dashboard = () => {
   const { usuario, logout } = useAuth()
 
@@ -23,7 +28,9 @@ const Dashboard = () => {
     { href:'/inventario',  emoji:'🏭', label:'Inventario',  roles:['Administrador','Bodeguero'] },
     { href:'/proveedores', emoji:'🏢', label:'Proveedores', roles:['Administrador'] },
     { href:'/pos',         emoji:'🛒', label:'Punto de Venta', roles:['Administrador','Vendedor'] },
-    { href:'/ventas',      emoji:'💰', label:'Ventas',      roles:['Administrador','Vendedor'] }
+    { href:'/ventas',      emoji:'💰', label:'Ventas',      roles:['Administrador','Vendedor'] },
+    // Agregar en el array de módulos del Dashboard:
+    { href:'/clientes',    emoji:'👥', label:'Clientes', roles:['Administrador','Vendedor'] }
   ].filter(m => m.roles.includes(usuario?.rol))
 
   return (
@@ -89,6 +96,12 @@ function App() {
           <Route path="/pos"                    element={<PrivateRoute><PosPage /></PrivateRoute>} />
           <Route path="/ventas"                 element={<PrivateRoute><VentasPage /></PrivateRoute>} />
           <Route path="/ventas/:id/comprobante" element={<PrivateRoute><ComprobantePage /></PrivateRoute>} />
+
+          {/* Clientes */}
+          <Route path="/clientes"            element={<PrivateRoute><ClientesPage /></PrivateRoute>} />
+          <Route path="/clientes/nuevo"      element={<PrivateRoute><ClienteFormPage /></PrivateRoute>} />
+          <Route path="/clientes/:id"        element={<PrivateRoute><ClienteDetallePage /></PrivateRoute>} />
+          <Route path="/clientes/:id/editar" element={<PrivateRoute><ClienteFormPage /></PrivateRoute>} />
 
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={

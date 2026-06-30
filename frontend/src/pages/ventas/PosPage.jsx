@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { productosService } from '../../services/productos.service.js'
 import { ventasService } from '../../services/ventas.service.js'
+import { clientesService } from '../../services/clientes.service.js' // ← IMPORT AGREGADO
 
 const PosPage = () => {
   const navigate        = useNavigate()
@@ -18,10 +19,16 @@ const PosPage = () => {
   const [carrito,       setCarrito]      = useState([])
 
   // Estado de la venta
-  const [descuento,     setDescuento]    = useState(0)
+  const [descuento,      setDescuento]    = useState(0)
   const [metodoPago,    setMetodoPago]   = useState('EFECTIVO')
   const [confirmando,   setConfirmando]  = useState(false)
   const [errorVenta,    setErrorVenta]   = useState('')
+
+  // ESTADOS DE CLIENTE AGREGADOS
+  const [clienteSeleccionado, setClienteSeleccionado] = useState(null)
+  const [busquedaCliente,     setBusquedaCliente]     = useState('')
+  const [resultadosCliente,   setResultadosCliente]   = useState([])
+  const debounceClienteRef = useRef(null)
 
   // ── BÚSQUEDA DE PRODUCTOS ──
   const handleBusqueda = (valor) => {
@@ -46,6 +53,32 @@ const PosPage = () => {
     }, 300)
   }
 
+  // FUNCIONES DE CLIENTE AGREGADAS
+  const handleBusquedaCliente = (valor) => {
+    setBusquedaCliente(valor)
+    clearTimeout(debounceClienteRef.current)
+
+    if (!valor.trim()) {
+      setResultadosCliente([])
+      return
+    }
+
+    debounceClienteRef.current = setTimeout(async () => {
+      try {
+        const res = await clientesService.listar({ search: valor, limit: 5 })
+        setResultadosCliente(res.data.data)
+      } catch {
+        setResultadosCliente([])
+      }
+    }, 300)
+  }
+
+  const seleccionarCliente = (cliente) => {
+    setClienteSeleccionado(cliente)
+    setBusquedaCliente('')
+    setResultadosCliente([])
+  }
+
   // ── AGREGAR AL CARRITO ──
   const agregarAlCarrito = (producto) => {
     const stockDisponible = producto.inventario?.stock_actual ?? 0
@@ -54,7 +87,6 @@ const PosPage = () => {
       const existe = prev.find(i => i.producto_id === producto.id)
 
       if (existe) {
-        // Si ya existe, aumentar cantidad (respetando stock)
         return prev.map(i =>
           i.producto_id === producto.id
             ? {
@@ -67,7 +99,6 @@ const PosPage = () => {
         )
       }
 
-      // Si no existe, agregar nuevo ítem
       return [...prev, {
         producto_id:     producto.id,
         codigo:          producto.codigo,
@@ -79,7 +110,6 @@ const PosPage = () => {
       }]
     })
 
-    // Limpiar búsqueda
     setBusqueda('')
     setResultados([])
   }
@@ -108,7 +138,6 @@ const PosPage = () => {
   const montoDescuento = parseFloat((subtotal * descuentoVal / 100).toFixed(2))
   const total          = parseFloat((subtotal - montoDescuento).toFixed(2))
 
-  // Restricción: Vendedor no puede dar >10% de descuento
   const maxDescuento = usuario?.rol === 'Administrador' ? 100 : 10
 
   // ── CONFIRMAR VENTA ──
@@ -119,6 +148,7 @@ const PosPage = () => {
 
     try {
       const body = {
+        cliente_id: clienteSeleccionado?.id || null,  // ← LÍNEA AGREGADA
         items: carrito.map(i => ({
           producto_id:     i.producto_id,
           cantidad:        i.cantidad,
@@ -131,12 +161,11 @@ const PosPage = () => {
       const res = await ventasService.registrar(body)
       const venta = res.data.data
 
-      // Limpiar carrito
       setCarrito([])
       setDescuento(0)
       setMetodoPago('EFECTIVO')
+      setClienteSeleccionado(null) // Limpiamos también el cliente al finalizar exitosamente
 
-      // Ir al comprobante
       navigate(`/ventas/${venta.id}/comprobante`)
 
     } catch (err) {
@@ -348,6 +377,64 @@ const PosPage = () => {
         {/* Footer con totales y acciones */}
         <div className="border-t border-gray-100 px-5 py-4 space-y-4">
 
+          {/* UI DE BUSCADOR DE CLIENTE AGREGADA JUSTO ENCIMA DEL DESCUENTO */}
+          <div className="border-b border-gray-100 pb-4">
+            <p className="text-sm font-medium text-gray-600 mb-2">Cliente (opcional)</p>
+
+            {clienteSeleccionado ? (
+              <div className="flex items-center justify-between bg-blue-50
+                              rounded-lg px-3 py-2">
+                <div>
+                  <p className="text-sm font-medium text-blue-800">
+                    👤 {clienteSeleccionado.nombre} {clienteSeleccionado.apellidos || ''}
+                  </p>
+                  <p className="text-xs text-blue-600 font-mono">
+                    {clienteSeleccionado.tipo_documento}: {clienteSeleccionado.numero_documento}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setClienteSeleccionado(null)}
+                  className="text-blue-400 hover:text-blue-600 text-xs ml-2"
+                >
+                  ✕
+                </button>
+              </div>
+            ) : (
+              <div className="relative">
+                <input
+                  type="text"
+                  value={busquedaCliente}
+                  onChange={(e) => handleBusquedaCliente(e.target.value)}
+                  placeholder="Buscar por DNI o nombre..."
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2
+                             text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+                {resultadosCliente.length > 0 && (
+                  <div className="absolute bottom-full left-0 right-0 mb-1
+                                  bg-white border border-gray-200 rounded-lg shadow-lg
+                                  max-h-40 overflow-y-auto z-10">
+                    {resultadosCliente.map(c => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => seleccionarCliente(c)}
+                        className="w-full text-left px-3 py-2 hover:bg-blue-50
+                                   text-sm border-b border-gray-50 last:border-0"
+                      >
+                        <p className="font-medium text-gray-800">
+                          {c.nombre} {c.apellidos || ''}
+                        </p>
+                        <p className="text-xs text-gray-400 font-mono">
+                          {c.tipo_documento}: {c.numero_documento}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Descuento */}
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium text-gray-600">
@@ -393,7 +480,7 @@ const PosPage = () => {
                   {m === 'EFECTIVO'      ? '💵 Efectivo' :
                    m === 'YAPE'          ? '📱 Yape' :
                    m === 'PLIN'          ? '📲 Plin' :
-                                          '🏦 Transferencia'}
+                                           '🏦 Transferencia'}
                 </button>
               ))}
             </div>
