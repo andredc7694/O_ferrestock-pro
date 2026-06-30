@@ -1,72 +1,61 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext.jsx'
 import PrivateRoute from './routes/PrivateRoute.jsx'
+import RoleRoute    from './routes/RoleRoute.jsx'
 
-// Páginas
-import LoginPage            from './pages/auth/LoginPage.jsx'
-import ProductosPage        from './pages/productos/ProductosPage.jsx'
-import ProductoFormPage     from './pages/productos/ProductoFormPage.jsx'
-import InventarioPage       from './pages/inventario/InventarioPage.jsx'
-import MovimientoFormPage   from './pages/inventario/MovimientoFormPage.jsx'
+// Auth
+import LoginPage from './pages/auth/LoginPage.jsx'
+
+// Dashboard y Reportes
+import DashboardPage from './pages/dashboard/DashboardPage.jsx'
+import ReportesPage  from './pages/reportes/ReportesPage.jsx'
+
+// Productos
+import ProductosPage    from './pages/productos/ProductosPage.jsx'
+import ProductoFormPage from './pages/productos/ProductoFormPage.jsx'
+
+// Inventario
+import InventarioPage     from './pages/inventario/InventarioPage.jsx'
+import MovimientoFormPage from './pages/inventario/MovimientoFormPage.jsx'
+
+// Proveedores
 import ProveedoresPage      from './pages/proveedores/ProveedoresPage.jsx'
 import ProveedorFormPage    from './pages/proveedores/ProveedorFormPage.jsx'
 import ProveedorDetallePage from './pages/proveedores/ProveedorDetallePage.jsx'
-import PosPage              from './pages/ventas/PosPage.jsx'
-import ComprobantePage      from './pages/ventas/ComprobantePage.jsx'
-import VentasPage           from './pages/ventas/VentasPage.jsx'
 
-// Agregar estos imports
-import ClientesPage      from './pages/clientes/ClientesPage.jsx'
-import ClienteFormPage   from './pages/clientes/ClienteFormPage.jsx'
+// Ventas
+import PosPage         from './pages/ventas/PosPage.jsx'
+import ComprobantePage from './pages/ventas/ComprobantePage.jsx'
+import VentasPage      from './pages/ventas/VentasPage.jsx'
+
+// Clientes
+import ClientesPage       from './pages/clientes/ClientesPage.jsx'
+import ClienteFormPage    from './pages/clientes/ClienteFormPage.jsx'
 import ClienteDetallePage from './pages/clientes/ClienteDetallePage.jsx'
 
-const Dashboard = () => {
-  const { usuario, logout } = useAuth()
-
-  const modulos = [
-    { href:'/productos',   emoji:'📦', label:'Productos',   roles:['Administrador','Vendedor','Bodeguero'] },
-    { href:'/inventario',  emoji:'🏭', label:'Inventario',  roles:['Administrador','Bodeguero'] },
-    { href:'/proveedores', emoji:'🏢', label:'Proveedores', roles:['Administrador'] },
-    { href:'/pos',         emoji:'🛒', label:'Punto de Venta', roles:['Administrador','Vendedor'] },
-    { href:'/ventas',      emoji:'💰', label:'Ventas',      roles:['Administrador','Vendedor'] },
-    // Agregar en el array de módulos del Dashboard:
-    { href:'/clientes',    emoji:'👥', label:'Clientes', roles:['Administrador','Vendedor'] }
-  ].filter(m => m.roles.includes(usuario?.rol))
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-blue-700">🔧 FerreStock Pro</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-gray-600 text-sm">
-            {usuario?.nombre} —{' '}
-            <span className="font-medium text-blue-600">{usuario?.rol}</span>
-          </span>
-          <button onClick={logout}
-            className="bg-red-500 hover:bg-red-600 text-white
-                       text-sm px-3 py-1.5 rounded-lg transition">
-            Cerrar sesión
-          </button>
-        </div>
-      </nav>
-      <div className="p-6">
-        <h2 className="text-xl font-semibold text-gray-700 mb-6">
-          Bienvenido, {usuario?.nombre} 👋
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-2xl">
-          {modulos.map(m => (
-            <a key={m.href} href={m.href}
-              className="bg-white rounded-xl shadow p-6 hover:shadow-md
-                         transition text-center border-2 border-transparent
-                         hover:border-blue-500">
-              <div className="text-3xl mb-2">{m.emoji}</div>
-              <p className="font-semibold text-gray-700">{m.label}</p>
-            </a>
-          ))}
-        </div>
-      </div>
+// Página de acceso denegado simple
+const AccesoDenegado = () => (
+  <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="text-center">
+      <p className="text-5xl mb-4">🚫</p>
+      <h1 className="text-2xl font-bold text-gray-700">Acceso denegado</h1>
+      <p className="text-gray-500 mt-2">No tienes permiso para ver esta página</p>
+      <a href="/dashboard"
+         className="mt-4 inline-block bg-blue-600 text-white
+                    px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+        Volver al inicio
+      </a>
     </div>
-  )
+  </div>
+)
+
+// Redirección inteligente según el rol del usuario
+const RutaRaiz = () => {
+  const { usuario } = useAuth()
+  if (!usuario) return <Navigate to="/login" replace />
+  if (usuario.rol === 'Administrador') return <Navigate to="/dashboard" replace />
+  if (usuario.rol === 'Vendedor')      return <Navigate to="/pos" replace />
+  return <Navigate to="/inventario" replace /> // Bodeguero
 }
 
 function App() {
@@ -74,41 +63,157 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/login"      element={<LoginPage />} />
-          <Route path="/dashboard"  element={<PrivateRoute><Dashboard /></PrivateRoute>} />
 
-          {/* Productos */}
-          <Route path="/productos"              element={<PrivateRoute><ProductosPage /></PrivateRoute>} />
-          <Route path="/productos/nuevo"        element={<PrivateRoute><ProductoFormPage /></PrivateRoute>} />
-          <Route path="/productos/:id/editar"   element={<PrivateRoute><ProductoFormPage /></PrivateRoute>} />
+          {/* ── PÚBLICA ── */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/acceso-denegado" element={<AccesoDenegado />} />
 
-          {/* Inventario */}
-          <Route path="/inventario"                     element={<PrivateRoute><InventarioPage /></PrivateRoute>} />
-          <Route path="/inventario/movimiento/nuevo"    element={<PrivateRoute><MovimientoFormPage /></PrivateRoute>} />
+          {/* ── RAÍZ INTELIGENTE ── */}
+          <Route path="/" element={
+            <PrivateRoute><RutaRaiz /></PrivateRoute>
+          } />
 
-          {/* Proveedores */}
-          <Route path="/proveedores"            element={<PrivateRoute><ProveedoresPage /></PrivateRoute>} />
-          <Route path="/proveedores/nuevo"      element={<PrivateRoute><ProveedorFormPage /></PrivateRoute>} />
-          <Route path="/proveedores/:id"        element={<PrivateRoute><ProveedorDetallePage /></PrivateRoute>} />
-          <Route path="/proveedores/:id/editar" element={<PrivateRoute><ProveedorFormPage /></PrivateRoute>} />
+          {/* ── DASHBOARD (solo Admin) ── */}
+          <Route path="/dashboard" element={
+            <PrivateRoute>
+              <RoleRoute roles={['Administrador']}>
+                <DashboardPage />
+              </RoleRoute>
+            </PrivateRoute>
+          } />
 
-          {/* Ventas */}
-          <Route path="/pos"                    element={<PrivateRoute><PosPage /></PrivateRoute>} />
-          <Route path="/ventas"                 element={<PrivateRoute><VentasPage /></PrivateRoute>} />
-          <Route path="/ventas/:id/comprobante" element={<PrivateRoute><ComprobantePage /></PrivateRoute>} />
+          {/* ── REPORTES (solo Admin) ── */}
+          <Route path="/reportes" element={
+            <PrivateRoute>
+              <RoleRoute roles={['Administrador']}>
+                <ReportesPage />
+              </RoleRoute>
+            </PrivateRoute>
+          } />
 
-          {/* Clientes */}
-          <Route path="/clientes"            element={<PrivateRoute><ClientesPage /></PrivateRoute>} />
-          <Route path="/clientes/nuevo"      element={<PrivateRoute><ClienteFormPage /></PrivateRoute>} />
-          <Route path="/clientes/:id"        element={<PrivateRoute><ClienteDetallePage /></PrivateRoute>} />
-          <Route path="/clientes/:id/editar" element={<PrivateRoute><ClienteFormPage /></PrivateRoute>} />
+          {/* ── PRODUCTOS (todos) ── */}
+          <Route path="/productos" element={
+            <PrivateRoute><ProductosPage /></PrivateRoute>
+          } />
+          <Route path="/productos/nuevo" element={
+            <PrivateRoute><ProductoFormPage /></PrivateRoute>
+          } />
+          <Route path="/productos/:id/editar" element={
+            <PrivateRoute><ProductoFormPage /></PrivateRoute>
+          } />
 
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          {/* ── INVENTARIO (Admin y Bodeguero) ── */}
+          <Route path="/inventario" element={
+            <PrivateRoute>
+              <RoleRoute roles={['Administrador','Bodeguero']}>
+                <InventarioPage />
+              </RoleRoute>
+            </PrivateRoute>
+          } />
+          <Route path="/inventario/movimiento/nuevo" element={
+            <PrivateRoute>
+              <RoleRoute roles={['Administrador','Bodeguero']}>
+                <MovimientoFormPage />
+              </RoleRoute>
+            </PrivateRoute>
+          } />
+
+          {/* ── PROVEEDORES (solo Admin) ── */}
+          <Route path="/proveedores" element={
+            <PrivateRoute>
+              <RoleRoute roles={['Administrador']}>
+                <ProveedoresPage />
+              </RoleRoute>
+            </PrivateRoute>
+          } />
+          <Route path="/proveedores/nuevo" element={
+            <PrivateRoute>
+              <RoleRoute roles={['Administrador']}>
+                <ProveedorFormPage />
+              </RoleRoute>
+            </PrivateRoute>
+          } />
+          <Route path="/proveedores/:id" element={
+            <PrivateRoute>
+              <RoleRoute roles={['Administrador']}>
+                <ProveedorDetallePage />
+              </RoleRoute>
+            </PrivateRoute>
+          } />
+          <Route path="/proveedores/:id/editar" element={
+            <PrivateRoute>
+              <RoleRoute roles={['Administrador']}>
+                <ProveedorFormPage />
+              </RoleRoute>
+            </PrivateRoute>
+          } />
+
+          {/* ── VENTAS (Admin y Vendedor) ── */}
+          <Route path="/pos" element={
+            <PrivateRoute>
+              <RoleRoute roles={['Administrador','Vendedor']}>
+                <PosPage />
+              </RoleRoute>
+            </PrivateRoute>
+          } />
+          <Route path="/ventas" element={
+            <PrivateRoute>
+              <RoleRoute roles={['Administrador','Vendedor']}>
+                <VentasPage />
+              </RoleRoute>
+            </PrivateRoute>
+          } />
+          <Route path="/ventas/:id/comprobante" element={
+            <PrivateRoute>
+              <RoleRoute roles={['Administrador','Vendedor']}>
+                <ComprobantePage />
+              </RoleRoute>
+            </PrivateRoute>
+          } />
+
+          {/* ── CLIENTES (Admin y Vendedor) ── */}
+          <Route path="/clientes" element={
+            <PrivateRoute>
+              <RoleRoute roles={['Administrador','Vendedor']}>
+                <ClientesPage />
+              </RoleRoute>
+            </PrivateRoute>
+          } />
+          <Route path="/clientes/nuevo" element={
+            <PrivateRoute>
+              <RoleRoute roles={['Administrador','Vendedor']}>
+                <ClienteFormPage />
+              </RoleRoute>
+            </PrivateRoute>
+          } />
+          <Route path="/clientes/:id" element={
+            <PrivateRoute>
+              <RoleRoute roles={['Administrador','Vendedor']}>
+                <ClienteDetallePage />
+              </RoleRoute>
+            </PrivateRoute>
+          } />
+          <Route path="/clientes/:id/editar" element={
+            <PrivateRoute>
+              <RoleRoute roles={['Administrador','Vendedor']}>
+                <ClienteFormPage />
+              </RoleRoute>
+            </PrivateRoute>
+          } />
+
+          {/* ── 404 ── */}
           <Route path="*" element={
             <div className="p-8 text-center">
-              <h1 className="text-2xl font-bold text-gray-600">404 — No encontrado</h1>
+              <h1 className="text-2xl font-bold text-gray-600">
+                404 — Página no encontrada
+              </h1>
+              <a href="/"
+                 className="mt-4 inline-block text-blue-600 hover:underline">
+                Volver al inicio
+              </a>
             </div>
           } />
+
         </Routes>
       </AuthProvider>
     </BrowserRouter>
