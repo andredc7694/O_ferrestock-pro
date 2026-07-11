@@ -58,6 +58,14 @@ const VentasPage = () => {
   return (
     <div className="p-6">
 
+      {/* Botón volver */}
+      <button
+        onClick={() => navigate('/dashboard')}
+        className="text-blue-600 hover:text-blue-800 text-sm font-medium mb-4 flex items-center gap-1"
+      >
+        ← Volver al inicio
+      </button>
+
       {/* Encabezado */}
       <div className="flex justify-between items-center mb-6">
         <div>

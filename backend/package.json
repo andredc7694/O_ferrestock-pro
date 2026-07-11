@@ -1,16 +1,20 @@
 {
   "name": "ferrestock-pro-backend",
   "version": "1.0.0",
-  "description": "Backend de FerreStock Pro - Sistema de Inventario y Ventas",
+  "description": "Backend de FerreStock Pro",
   "main": "src/app.js",
   "type": "module",
+
   "scripts": {
-    "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+  "dev":   "nodemon src/server.js",
+  "start": "node src/server.js",
+  "test":  "node --experimental-vm-modules node_modules/jest/bin/jest.js --verbose"
+},
+  "jest": {
+    "transform": {}
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
-    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
@@ -20,6 +24,7 @@
     "sequelize": "^6.37.3"
   },
   "devDependencies": {
+    "jest": "^29.7.0",
     "nodemon": "^3.1.0"
   }
 }

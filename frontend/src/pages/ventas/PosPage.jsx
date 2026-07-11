@@ -178,7 +178,8 @@ const PosPage = () => {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100 overflow-hidden">
+
+        <div className="flex h-screen bg-gray-100 overflow-hidden">
 
       {/* ── PANEL IZQUIERDO: BUSCADOR ── */}
       <div className="flex-1 p-6 overflow-y-auto">
@@ -207,6 +208,14 @@ const PosPage = () => {
             </div>
           )}
         </div>
+
+      {/* Botón volver */}
+      <button
+        onClick={() => navigate('/dashboard')}
+        className="text-blue-600 hover:text-blue-800 text-sm font-medium mb-4 flex items-center gap-1"
+      >
+        ← Volver al inicio
+      </button>
 
         {/* Resultados de búsqueda */}
         {resultados.length > 0 && (
