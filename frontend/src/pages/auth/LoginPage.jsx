@@ -103,7 +103,7 @@ const LoginPage = () => {
         </form>
 
         <p className="text-center text-xs text-gray-400 mt-6">
-          FerreStock Pro © 2025 — UNSCH
+          FerreStock Pro © 2026 — UNSCH
         </p>
       </div>
     </div>
