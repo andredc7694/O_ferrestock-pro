@@ -1,8 +1,13 @@
 import axios from 'axios'
 
+// Normaliza la baseURL para garantizar que siempre termine en /api,
+// sin importar si VITE_API_URL ya lo incluye (local) o no (Vercel)
+const rawBaseURL = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '')
+const baseURL = rawBaseURL.endsWith('/api') ? rawBaseURL : `${rawBaseURL}/api`
+
 // Instancia de Axios con la URL base del backend
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL,
   headers: {
     'Content-Type': 'application/json'
   }
