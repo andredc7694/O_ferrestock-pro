@@ -9,6 +9,7 @@ const VentasPage = () => {
   const [ventas,        setVentas]      = useState([])
   const [pagination,    setPagination]  = useState(null)
   const [loading,       setLoading]     = useState(true)
+  const [error,         setError]       = useState(null)
   const [filtros,       setFiltros]     = useState({
     fecha_inicio: '', fecha_fin: '', metodo_pago: '', page: 1
   })
@@ -16,11 +17,12 @@ const VentasPage = () => {
   const cargar = async (params = filtros) => {
     try {
       setLoading(true)
+      setError(null)
       const res = await ventasService.listar(params)
       setVentas(res.data.data)
       setPagination(res.data.pagination)
     } catch {
-      console.error('Error al cargar ventas')
+      setError('Error al cargar las ventas')
     } finally {
       setLoading(false)
     }
@@ -148,6 +150,12 @@ const VentasPage = () => {
               <tr>
                 <td colSpan={7} className="text-center py-12 text-gray-400">
                   ⏳ Cargando ventas...
+                </td>
+              </tr>
+            ) : error ? (
+              <tr>
+                <td colSpan={7} className="text-center py-12 text-red-500">
+                  ❌ {error}
                 </td>
               </tr>
             ) : ventas.length === 0 ? (

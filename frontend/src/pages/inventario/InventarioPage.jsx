@@ -36,7 +36,8 @@ const InventarioPage = () => {
   const navigate = useNavigate()
   const {
     stock, alertas, movimientos, pagination,
-    loading, error, recargarMovimientos
+    loading, error, recargarMovimientos,
+    loadingMovimientos, errorMovimientos
   } = useInventario()
 
   const [vistaActiva, setVistaActiva] = useState('stock') // 'stock' | 'movimientos' | 'alertas'
@@ -271,7 +272,19 @@ const InventarioPage = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {movimientos.length === 0 ? (
+                {loadingMovimientos ? (
+                  <tr>
+                    <td colSpan={8} className="text-center py-12 text-gray-400">
+                      ⏳ Cargando movimientos...
+                    </td>
+                  </tr>
+                ) : errorMovimientos ? (
+                  <tr>
+                    <td colSpan={8} className="text-center py-12 text-red-500">
+                      ❌ {errorMovimientos}
+                    </td>
+                  </tr>
+                ) : movimientos.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="text-center py-12 text-gray-400">
                       📋 No hay movimientos registrados

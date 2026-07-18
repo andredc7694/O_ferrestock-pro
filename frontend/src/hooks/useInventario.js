@@ -8,6 +8,8 @@ export const useInventario = () => {
   const [pagination, setPagination] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [loadingMovimientos, setLoadingMovimientos] = useState(true)
+  const [errorMovimientos, setErrorMovimientos] = useState(null)
 
   const cargarStock = useCallback(async () => {
     try {
@@ -28,11 +30,15 @@ export const useInventario = () => {
 
   const cargarMovimientos = useCallback(async (params = {}) => {
     try {
+      setLoadingMovimientos(true)
+      setErrorMovimientos(null)
       const res = await inventarioService.obtenerMovimientos(params)
       setMovimientos(res.data.data)
       setPagination(res.data.pagination)
     } catch (err) {
-      console.error('Error al cargar movimientos:', err)
+      setErrorMovimientos('Error al cargar el historial de movimientos')
+    } finally {
+      setLoadingMovimientos(false)
     }
   }, [])
 
@@ -44,6 +50,7 @@ export const useInventario = () => {
   return {
     stock, alertas, movimientos, pagination,
     loading, error,
+    loadingMovimientos, errorMovimientos,
     recargar: cargarStock,
     recargarMovimientos: cargarMovimientos
   }
