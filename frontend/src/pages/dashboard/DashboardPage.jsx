@@ -303,11 +303,11 @@ const DashboardPage = () => {
                             {p.producto?.nombre}
                           </p>
                           <p className="text-gray-400 text-xs">
-                            {parseInt(p.dataValues?.unidades_vendidas || 0)} unidades
+                            {parseInt(p.unidades_vendidas || 0)} unidades
                           </p>
                         </div>
                         <p className="text-green-600 font-medium text-sm">
-                          S/ {parseFloat(p.dataValues?.ingreso_generado || 0).toFixed(2)}
+                          S/ {parseFloat(p.ingreso_generado || 0).toFixed(2)}
                         </p>
                       </div>
                     ))}
