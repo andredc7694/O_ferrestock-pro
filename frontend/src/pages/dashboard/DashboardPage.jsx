@@ -81,6 +81,7 @@ const DashboardPage = () => {
               { href:'/productos',   label:'Productos',  emoji:'📦' },
               { href:'/inventario',  label:'Inventario', emoji:'🏭' },
               { href:'/clientes',    label:'Clientes',   emoji:'👥' },
+              { href:'/proveedores', label:'Proveedores', emoji:'🏢' },
               { href:'/reportes',    label:'Reportes',   emoji:'📊' }
             ].map(item => (
               <button
