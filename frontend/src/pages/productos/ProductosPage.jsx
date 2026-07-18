@@ -4,6 +4,7 @@ import { useProductos } from '../../hooks/useProductos.js'
 import { useCategorias } from '../../hooks/useCategorias.js'
 import { productosService } from '../../services/productos.service.js'
 import { useAuth } from '../../context/AuthContext.jsx'
+import { useSlowLoadingMessage } from '../../hooks/useSlowLoadingMessage.js'
 
 // Badge de estado de stock
 const BadgeStock = ({ estado }) => {
@@ -30,6 +31,7 @@ const ProductosPage = () => {
     productos, pagination, loading, error,
     filtros, cambiarFiltros, cambiarPagina, recargar
   } = useProductos({ page: 1, limit: 10 })
+  const mensajeLento = useSlowLoadingMessage(loading)
 
   const [searchInput, setSearchInput] = useState('')
   const debounceRef = useRef(null)
@@ -58,7 +60,14 @@ const ProductosPage = () => {
 
   if (error) return (
     <div className="p-6 text-red-600 bg-red-50 rounded-lg">
-      ❌ {error}
+      <p>❌ {error}</p>
+      <button
+        onClick={() => recargar(filtros)}
+        className="mt-3 bg-red-600 hover:bg-red-700 text-white text-sm
+                   font-medium px-4 py-2 rounded-lg transition"
+      >
+        🔄 Reintentar
+      </button>
     </div>
   )
 
@@ -133,7 +142,7 @@ const ProductosPage = () => {
             {loading ? (
               <tr>
                 <td colSpan={8} className="text-center py-12 text-gray-400">
-                  ⏳ Cargando productos...
+                  ⏳ {mensajeLento || 'Cargando productos...'}
                 </td>
               </tr>
             ) : productos.length === 0 ? (

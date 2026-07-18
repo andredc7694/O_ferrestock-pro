@@ -6,6 +6,7 @@ import {
 } from 'recharts'
 import { reportesService } from '../../services/reportes.service.js'
 import { useCategorias }   from '../../hooks/useCategorias.js'
+import { useSlowLoadingMessage } from '../../hooks/useSlowLoadingMessage.js'
 
 // ── Sección 1: Reporte de Ventas ──
 const ReporteVentas = () => {
@@ -17,6 +18,7 @@ const ReporteVentas = () => {
   const [fechas,  setFechas]  = useState({ inicio: inicioMes, fin: hoy })
   const [datos,   setDatos]   = useState(null)
   const [loading, setLoading] = useState(false)
+  const mensajeLento = useSlowLoadingMessage(loading)
 
   const colores = {
     EFECTIVO: '#10b981', YAPE: '#8b5cf6',
@@ -93,7 +95,7 @@ const ReporteVentas = () => {
           className="self-end bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300
                      text-white font-medium px-5 py-2 rounded-lg text-sm transition"
         >
-          {loading ? '⏳ Generando...' : '📊 Generar reporte'}
+          {loading ? (mensajeLento ? `⏳ ${mensajeLento}` : '⏳ Generando...') : '📊 Generar reporte'}
         </button>
       </div>
 
@@ -204,6 +206,7 @@ const ReporteTopProductos = () => {
   const [periodo, setPeriodo] = useState('mes')
   const [datos,   setDatos]   = useState(null)
   const [loading, setLoading] = useState(false)
+  const mensajeLento = useSlowLoadingMessage(loading)
 
   const generar = async () => {
     setLoading(true)
@@ -245,7 +248,7 @@ const ReporteTopProductos = () => {
           className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300
                      text-white font-medium px-5 py-2 rounded-lg text-sm transition"
         >
-          {loading ? '⏳...' : '📊 Generar'}
+          {loading ? (mensajeLento ? `⏳ ${mensajeLento}` : '⏳...') : '📊 Generar'}
         </button>
       </div>
 
@@ -342,6 +345,7 @@ const ReporteStock = () => {
   const [filtros,  setFiltros]  = useState({ categoria_id: '', estado: '' })
   const [datos,    setDatos]    = useState(null)
   const [loading,  setLoading]  = useState(false)
+  const mensajeLento = useSlowLoadingMessage(loading)
 
   const generar = async () => {
     setLoading(true)
@@ -402,7 +406,7 @@ const ReporteStock = () => {
           className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-300
                      text-white font-medium px-5 py-2 rounded-lg text-sm transition"
         >
-          {loading ? '⏳ Generando...' : '📊 Generar reporte'}
+          {loading ? (mensajeLento ? `⏳ ${mensajeLento}` : '⏳ Generando...') : '📊 Generar reporte'}
         </button>
       </div>
 

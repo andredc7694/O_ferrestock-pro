@@ -2,10 +2,12 @@ import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useProveedores } from '../../hooks/useProveedores.js'
 import { proveedoresService } from '../../services/proveedores.service.js'
+import { useSlowLoadingMessage } from '../../hooks/useSlowLoadingMessage.js'
 
 const ProveedoresPage = () => {
   const navigate    = useNavigate()
   const { proveedores, pagination, loading, error, recargar } = useProveedores()
+  const mensajeLento = useSlowLoadingMessage(loading)
 
   const [searchInput, setSearchInput] = useState('')
   const debounceRef = useRef(null)
@@ -29,7 +31,16 @@ const ProveedoresPage = () => {
   }
 
   if (error) return (
-    <div className="p-6 text-red-600 bg-red-50 rounded-lg">❌ {error}</div>
+    <div className="p-6 text-red-600 bg-red-50 rounded-lg">
+      <p>❌ {error}</p>
+      <button
+        onClick={() => recargar()}
+        className="mt-3 bg-red-600 hover:bg-red-700 text-white text-sm
+                   font-medium px-4 py-2 rounded-lg transition"
+      >
+        🔄 Reintentar
+      </button>
+    </div>
   )
 
   return (
@@ -90,7 +101,7 @@ const ProveedoresPage = () => {
             {loading ? (
               <tr>
                 <td colSpan={6} className="text-center py-12 text-gray-400">
-                  ⏳ Cargando proveedores...
+                  ⏳ {mensajeLento || 'Cargando proveedores...'}
                 </td>
               </tr>
             ) : proveedores.length === 0 ? (

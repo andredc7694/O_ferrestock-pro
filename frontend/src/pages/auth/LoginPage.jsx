@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
+import { useSlowLoadingMessage } from '../../hooks/useSlowLoadingMessage.js'
 
 const LoginPage = () => {
   const navigate = useNavigate()
@@ -9,6 +10,7 @@ const LoginPage = () => {
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const mensajeLento = useSlowLoadingMessage(loading)
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -99,6 +101,12 @@ const LoginPage = () => {
           >
             {loading ? '⏳ Iniciando sesión...' : 'Iniciar sesión'}
           </button>
+
+          {loading && mensajeLento && (
+            <p className="text-center text-xs text-gray-400">
+              ⏳ {mensajeLento}
+            </p>
+          )}
 
         </form>
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ventasService } from '../../services/ventas.service.js'
 import { useAuth } from '../../context/AuthContext.jsx'
+import { useSlowLoadingMessage } from '../../hooks/useSlowLoadingMessage.js'
 
 const VentasPage = () => {
   const navigate        = useNavigate()
@@ -10,6 +11,7 @@ const VentasPage = () => {
   const [pagination,    setPagination]  = useState(null)
   const [loading,       setLoading]     = useState(true)
   const [error,         setError]       = useState(null)
+  const mensajeLento = useSlowLoadingMessage(loading)
   const [filtros,       setFiltros]     = useState({
     fecha_inicio: '', fecha_fin: '', metodo_pago: '', page: 1
   })
@@ -149,13 +151,20 @@ const VentasPage = () => {
             {loading ? (
               <tr>
                 <td colSpan={7} className="text-center py-12 text-gray-400">
-                  ⏳ Cargando ventas...
+                  ⏳ {mensajeLento || 'Cargando ventas...'}
                 </td>
               </tr>
             ) : error ? (
               <tr>
                 <td colSpan={7} className="text-center py-12 text-red-500">
-                  ❌ {error}
+                  <p>❌ {error}</p>
+                  <button
+                    onClick={() => cargar()}
+                    className="mt-2 text-xs bg-red-600 text-white px-3 py-1
+                               rounded-lg hover:bg-red-700 transition"
+                  >
+                    🔄 Reintentar
+                  </button>
                 </td>
               </tr>
             ) : ventas.length === 0 ? (

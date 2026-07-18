@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useInventario } from '../../hooks/useInventario.js'
+import { useSlowLoadingMessage } from '../../hooks/useSlowLoadingMessage.js'
 
 // Badge de estado de stock
 const BadgeStock = ({ estado }) => {
@@ -36,9 +37,11 @@ const InventarioPage = () => {
   const navigate = useNavigate()
   const {
     stock, alertas, movimientos, pagination,
-    loading, error, recargarMovimientos,
+    loading, error, recargar, recargarMovimientos,
     loadingMovimientos, errorMovimientos
   } = useInventario()
+  const mensajeLento = useSlowLoadingMessage(loading)
+  const mensajeLentoMovimientos = useSlowLoadingMessage(loadingMovimientos)
 
   const [vistaActiva, setVistaActiva] = useState('stock') // 'stock' | 'movimientos' | 'alertas'
   const [filtroTipo, setFiltroTipo] = useState('')
@@ -49,11 +52,22 @@ const InventarioPage = () => {
   }
 
   if (loading) return (
-    <div className="p-6 text-gray-400 text-center">⏳ Cargando inventario...</div>
+    <div className="p-6 text-gray-400 text-center">
+      ⏳ {mensajeLento || 'Cargando inventario...'}
+    </div>
   )
 
   if (error) return (
-    <div className="p-6 text-red-600 bg-red-50 rounded-lg">❌ {error}</div>
+    <div className="p-6 text-red-600 bg-red-50 rounded-lg">
+      <p>❌ {error}</p>
+      <button
+        onClick={() => recargar()}
+        className="mt-3 bg-red-600 hover:bg-red-700 text-white text-sm
+                   font-medium px-4 py-2 rounded-lg transition"
+      >
+        🔄 Reintentar
+      </button>
+    </div>
   )
 
   return (
@@ -275,13 +289,20 @@ const InventarioPage = () => {
                 {loadingMovimientos ? (
                   <tr>
                     <td colSpan={8} className="text-center py-12 text-gray-400">
-                      ⏳ Cargando movimientos...
+                      ⏳ {mensajeLentoMovimientos || 'Cargando movimientos...'}
                     </td>
                   </tr>
                 ) : errorMovimientos ? (
                   <tr>
                     <td colSpan={8} className="text-center py-12 text-red-500">
-                      ❌ {errorMovimientos}
+                      <p>❌ {errorMovimientos}</p>
+                      <button
+                        onClick={() => recargarMovimientos(filtroTipo ? { tipo: filtroTipo } : {})}
+                        className="mt-2 text-xs bg-red-600 text-white px-3 py-1
+                                   rounded-lg hover:bg-red-700 transition"
+                      >
+                        🔄 Reintentar
+                      </button>
                     </td>
                   </tr>
                 ) : movimientos.length === 0 ? (

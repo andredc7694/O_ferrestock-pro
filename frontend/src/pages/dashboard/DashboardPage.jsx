@@ -6,6 +6,7 @@ import {
 } from 'recharts'
 import { reportesService } from '../../services/reportes.service.js'
 import { useAuth } from '../../context/AuthContext.jsx'
+import { useSlowLoadingMessage } from '../../hooks/useSlowLoadingMessage.js'
 
 // Tarjeta de métrica
 const TarjetaMetrica = ({ titulo, valor, subtitulo, color, emoji }) => (
@@ -29,20 +30,22 @@ const DashboardPage = () => {
   const [datos,   setDatos]   = useState(null)
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(null)
+  const mensajeLento = useSlowLoadingMessage(loading)
 
-  useEffect(() => {
-    const cargar = async () => {
-      try {
-        const res = await reportesService.dashboard()
-        setDatos(res.data.data)
-      } catch {
-        setError('Error al cargar el dashboard')
-      } finally {
-        setLoading(false)
-      }
+  const cargar = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const res = await reportesService.dashboard()
+      setDatos(res.data.data)
+    } catch {
+      setError('Error al cargar el dashboard')
+    } finally {
+      setLoading(false)
     }
-    cargar()
-  }, [])
+  }
+
+  useEffect(() => { cargar() }, [])
 
   // Tooltip personalizado para el gráfico
   const TooltipPersonalizado = ({ active, payload, label }) => {
@@ -122,18 +125,32 @@ const DashboardPage = () => {
 
         {loading ? (
           /* Skeleton de carga */
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            {[1,2,3,4].map(i => (
-              <div key={i} className="bg-white rounded-xl shadow p-5 animate-pulse">
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
-                <div className="h-8 bg-gray-200 rounded w-1/2"></div>
-              </div>
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              {[1,2,3,4].map(i => (
+                <div key={i} className="bg-white rounded-xl shadow p-5 animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+                  <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              ))}
+            </div>
+            {mensajeLento && (
+              <p className="text-center text-sm text-gray-400 mb-6">
+                ⏳ {mensajeLento}
+              </p>
+            )}
+          </>
         ) : error ? (
           <div className="bg-red-50 border border-red-200 text-red-700
                           rounded-xl p-6 text-center">
-            ❌ {error}
+            <p>❌ {error}</p>
+            <button
+              onClick={cargar}
+              className="mt-3 bg-red-600 hover:bg-red-700 text-white text-sm
+                         font-medium px-4 py-2 rounded-lg transition"
+            >
+              🔄 Reintentar
+            </button>
           </div>
         ) : (
           <>

@@ -3,11 +3,13 @@ import { useNavigate }      from 'react-router-dom'
 import { useClientes }      from '../../hooks/useClientes.js'
 import { clientesService }  from '../../services/clientes.service.js'
 import { useAuth }          from '../../context/AuthContext.jsx'
+import { useSlowLoadingMessage } from '../../hooks/useSlowLoadingMessage.js'
 
 const ClientesPage = () => {
   const navigate  = useNavigate()
   const { usuario } = useAuth()
   const { clientes, pagination, loading, error, recargar } = useClientes()
+  const mensajeLento = useSlowLoadingMessage(loading)
 
   const [searchInput, setSearchInput] = useState('')
   const debounceRef = useRef(null)
@@ -33,7 +35,16 @@ const ClientesPage = () => {
   const esAdmin = usuario?.rol === 'Administrador'
 
   if (error) return (
-    <div className="p-6 text-red-600 bg-red-50 rounded-lg">❌ {error}</div>
+    <div className="p-6 text-red-600 bg-red-50 rounded-lg">
+      <p>❌ {error}</p>
+      <button
+        onClick={() => recargar()}
+        className="mt-3 bg-red-600 hover:bg-red-700 text-white text-sm
+                   font-medium px-4 py-2 rounded-lg transition"
+      >
+        🔄 Reintentar
+      </button>
+    </div>
   )
 
   return (
@@ -93,7 +104,7 @@ const ClientesPage = () => {
             {loading ? (
               <tr>
                 <td colSpan={5} className="text-center py-12 text-gray-400">
-                  ⏳ Cargando clientes...
+                  ⏳ {mensajeLento || 'Cargando clientes...'}
                 </td>
               </tr>
             ) : clientes.length === 0 ? (

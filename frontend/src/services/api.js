@@ -8,6 +8,7 @@ const baseURL = rawBaseURL.endsWith('/api') ? rawBaseURL : `${rawBaseURL}/api`
 // Instancia de Axios con la URL base del backend
 const api = axios.create({
   baseURL,
+  timeout: 60000, // tolera el cold start del backend en Render (plan free)
   headers: {
     'Content-Type': 'application/json'
   }
